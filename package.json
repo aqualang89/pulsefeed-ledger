@@ -1,0 +1,11 @@
+{
+  "name": "pulsefeed-ledger",
+  "version": "0.1.0",
+  "description": "Liquidation maps with history, and a ledger that grades crypto signals against what actually happened. Built on the Nansen API.",
+  "type": "module",
+  "bin": { "pulsefeed-ledger": "index.mjs" },
+  "scripts": { "map": "node index.mjs map BTC", "watch": "node index.mjs watch BTC,ETH 60" },
+  "engines": { "node": ">=20" },
+  "license": "MIT",
+  "keywords": ["nansen", "hyperliquid", "liquidations", "perps", "backtest", "crypto"]
+}
