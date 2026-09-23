@@ -2,6 +2,8 @@
 
 Two tools built on the Nansen API for the Meridian Buildathon, both answering questions that a price chart cannot.
 
+Demo, 46 seconds: https://x.com/aqualanga/status/2102688996979560850
+
 **1. Liquidation maps with history.** Where open Hyperliquid positions get force-closed, and how those walls move over time. Every liquidation chart online is a snapshot of right now. Keep snapshotting and you learn something else: a wall that doubles while price stands still means somebody is adding into it, and a wall that halves in twenty minutes means somebody closed before price ever arrived.
 
 **2. A ledger that grades signals against outcomes.** Point it at a file of your own recorded calls and it tells you, unkindly, whether your filter is doing anything. It reports what the filter killed that then went up, not only what it saved you from.
