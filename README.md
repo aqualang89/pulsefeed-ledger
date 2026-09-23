@@ -47,6 +47,33 @@ worst position: short $227.5M at 5X, entry $75,210, liq $136,943, unrealized -$2
 
 Longs liquidate below price, shorts above, so the two sides are bucketed separately. Merged into one histogram you can no longer tell who gets hurt in which direction. The totals are over the largest tracked accounts Nansen returns, not the whole book, and the tool says so rather than pretending otherwise.
 
+#### Named wallets, and why "every wallet is labelled" is a trap
+
+`map` also shows how much of each wall sits on wallets with an actual identity, marked `*` in the bars, and lists the largest of them:
+
+```
+$75.1M of it sits on 6 wallets Nansen has a name for (* in the bars)
+ -18%    $70,155  long    $52.4M  **####  named $12.8M
+
+largest named positions:
+  zolpi.eth*: long $25.0M at 40X, liq $58,500 (-31.6% from price), unrealized $479K
+  samurai.eth: long $12.8M at 18X, liq $70,708 (-17.4% from price), unrealized $1.3M
+```
+
+The same wallet on ETH, same minute: long $90.5M at 25X, liquidation 8.8% below price.
+
+The obvious version of this feature is wrong. On a live pull of the largest BTC and ETH positions (23 Sep 2026, 187 wallets) all but one carried a Nansen label, so a naive "money on labelled wallets" line reads close to 100% and tells you nothing. Most of those labels are behaviour categories, not names: `HL Perps Whale` (83 of them, true of anyone who makes a top-100 list), `Uses <code> HL Referral Code` (70), `High Activity`, `High Balance`, `Token Millionaire`. The tool drops those and counts ENS names, entities and Smart Money tags. That leaves 3% of the BTC book and 5% of the ETH book in that pull, which is the part you can actually go and look up.
+
+`watch` records the named money inside the nearest walls too, so `moved` can say whether a wall grew because identifiable wallets added to it or because anonymous ones did. When named money is present in a wall, `moved` adds an `of which on named wallets: $A -> $B` line under it; when there is none, it stays silent. Real capture, 23 Sep 2026:
+
+```
+BTC: 3 snapshots over 2 minutes, price $85,569 -> $85,601
+  wall above: $6.2M at $87,280 -> $17.3M at $87,313  (grew, x2.77)
+  wall below: $11.1M at $83,858 -> $11.1M at $83,889  (held, x1.00)
+```
+
+The wall of shorts right above price nearly tripled in two minutes while price moved $32, and no named wallet was part of it: all of that was added by anonymous accounts.
+
 ### `moved` - the part a static chart cannot show
 
 ```

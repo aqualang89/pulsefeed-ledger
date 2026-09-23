@@ -26,6 +26,13 @@ async function map(sym = 'BTC') {
   const { loser, winner } = extremes(rows);
   if (loser) console.log(`\nworst position: ${loser.side} ${usd(loser.usd)}${loser.lev ? ` at ${loser.lev}` : ''}, entry ${px(loser.entry)}, liq ${px(loser.liq)}, unrealized ${usd(loser.upnl)}`);
   if (winner) console.log(`best position:  ${winner.side} ${usd(winner.usd)}, unrealized ${usd(winner.upnl)}`);
+  if (m.named.length) {
+    console.log('\nlargest named positions:');
+    for (const p of m.named.slice(0, 3)) {
+      const dist = ((p.liq / m.mark - 1) * 100).toFixed(1);
+      console.log(`  ${p.label}: ${p.side} ${usd(p.usd)}${p.lev ? ` at ${p.lev}` : ''}, liq ${px(p.liq)} (${dist > 0 ? '+' : ''}${dist}% from price), unrealized ${usd(p.upnl)}`);
+    }
+  }
 }
 
 async function watch(symsArg = 'BTC', everySec = 60, capArg) {
@@ -61,6 +68,10 @@ function moved(sym = 'BTC', hours = 6) {
     if (!from || !to) return;
     const verb = ratio > 1.15 ? 'grew' : ratio < 0.85 ? 'thinned' : 'held';
     console.log(`  wall ${name}: ${usd(from.usd)} at ${px(from.from)} -> ${usd(to.usd)} at ${px(to.from)}  (${verb}, x${ratio.toFixed(2)})`);
+    // snapshots taken before the named layer existed have no `named` field, so only compare when both do
+    if (from.named != null && to.named != null && (from.named || to.named)) {
+      console.log(`    of which on named wallets: ${usd(from.named)} -> ${usd(to.named)}`);
+    }
   };
   show('above', h.upFrom, h.upTo, h.upRatio);
   show('below', h.downFrom, h.downTo, h.downRatio);
