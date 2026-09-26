@@ -18,7 +18,8 @@ score against outcome:
   score 6-7        n=   4  up  25%  median    -3.8%  below -10%    1  below -50%    1
   score 7-8        n= 147  up  43%  median    -1.1%  below -10%   32  below -50%    4
   score 8-9        n=  36  up  28%  median   -14.1%  below -10%   21  below -50%    9
-  correlation -0.01 (0 means the score ranks nothing)
+  correlation -0.01 [95% CI -0.07 to 0.05], rank correlation 0.41 [95% CI 0.36 to 0.46], n=1107 (0 means the score ranks nothing)
+  267 signals sit at exactly 0, which usually means a hard gate rather than the score's own judgement. Without them: rank correlation 0.05 [95% CI -0.01 to 0.12], n=840
 
 risk=low         n= 575  up  47%  median    -0.3%  below -10%   31  below -50%    0
 risk=high        n= 417  up  18%  median   -87.4%  below -10%  315  below -50%  259
@@ -33,7 +34,7 @@ judge=normal       n=   9  up  89%  median    +4.0%  below -10%    0  below -50%
 
 **The pipeline works, and that is the least interesting finding.** What got published was up 53% of the time with a median of +0.3%; what was held back was up 34% with a median of -3.8%. Selection beats the pool it selects from. Fine. The interesting part is which piece of the selection is doing the work.
 
-**The score is decoration.** A 0-10 number from the filter, the one we spent weeks tuning and argued about in every code review, correlates with the outcome at -0.01. Worse than useless as a ranking: the top bucket, 8 to 9, has the worst median of all of them at -14.1%, and 9 of its 36 calls ended below -50%. Everything that made publishing better than not publishing came from somewhere else in the pipeline, and we would never have known which part without running this.
+**The score is decoration.** A 0-10 number from the filter, the one we spent weeks tuning and argued about in every code review, does not rank the outcome. (Corrected 26 Sep: the first version of this file said "-0.01", a Pearson figure that outliers decide. By rank the full sample reads 0.41, but 262 of the 267 zero scores were high-risk coins zeroed by a hard gate; without them the score's rank correlation is 0.05, 95% CI -0.01 to 0.12. Same conclusion, stated properly.) Worse than useless as a ranking: the top bucket, 8 to 9, has the worst median of all of them at -14.1%, and 9 of its 36 calls ended below -50%. Everything that made publishing better than not publishing came from somewhere else in the pipeline, and we would never have known which part without running this.
 
 **A label nobody discussed carried the signal.** The `risk` tag is three words attached during enrichment. `low` is up 47% with a median of -0.3% and not a single row below -50% out of 575. `high` is up 18% with a median of -87.4% and 259 rows below -50%. One field splits the same dataset cleanly while the carefully tuned number does nothing.
 

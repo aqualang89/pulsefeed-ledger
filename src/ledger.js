@@ -67,13 +67,42 @@ export function scoreCalibration(rows, buckets = [[0, 5], [5, 6], [6, 7], [7, 8]
   }
   if (scored.length > 8) {
     const xs = scored.map((r) => r.score), ys = scored.map(outcome);
-    const mx = mean(xs), my = mean(ys);
-    const cov = xs.reduce((s, x, i) => s + (x - mx) * (ys[i] - my), 0);
-    const sx = Math.sqrt(xs.reduce((s, x) => s + (x - mx) ** 2, 0));
-    const sy = Math.sqrt(ys.reduce((s, y) => s + (y - my) ** 2, 0));
-    out.correlation = sx && sy ? cov / (sx * sy) : null;
+    out.correlation = pearson(xs, ys);
+    out.ci = fisherCI(out.correlation, scored.length);
+    // Outcomes run from -100% to +5000%: one moonshot can move Pearson on its own. Rank correlation
+    // asks the plainer question, "do higher scores tend to come out ahead", and outliers can't carry it.
+    out.rank = pearson(ranks(xs), ranks(ys));
+    out.rankCi = fisherCI(out.rank, scored.length);
   }
   return out;
+}
+
+function pearson(xs, ys) {
+  const mx = mean(xs), my = mean(ys);
+  const cov = xs.reduce((s, x, i) => s + (x - mx) * (ys[i] - my), 0);
+  const sx = Math.sqrt(xs.reduce((s, x) => s + (x - mx) ** 2, 0));
+  const sy = Math.sqrt(ys.reduce((s, y) => s + (y - my) ** 2, 0));
+  return sx && sy ? cov / (sx * sy) : null;
+}
+
+// average rank for ties, so a score that only takes a few values is ranked fairly
+function ranks(a) {
+  const idx = a.map((v, i) => [v, i]).sort((p, q) => p[0] - q[0]);
+  const r = new Array(a.length);
+  for (let i = 0; i < idx.length;) {
+    let j = i;
+    while (j + 1 < idx.length && idx[j + 1][0] === idx[i][0]) j++;
+    for (let k = i; k <= j; k++) r[idx[k][1]] = (i + j) / 2 + 1;
+    i = j + 1;
+  }
+  return r;
+}
+
+// 95% interval via Fisher's z. If it straddles zero, the data cannot tell the score from noise.
+export function fisherCI(r, n) {
+  if (r == null || n < 4 || Math.abs(r) >= 1) return null;
+  const z = Math.atanh(r), se = 1 / Math.sqrt(n - 3);
+  return [Math.tanh(z - 1.96 * se), Math.tanh(z + 1.96 * se)];
 }
 
 // The two numbers a filter should be judged on, and the second one is the uncomfortable one.
@@ -123,7 +152,15 @@ export function report(rows) {
   if (cal.buckets.length) {
     out.push('score against outcome:');
     for (const b of cal.buckets) out.push('  ' + line(b));
-    if (cal.correlation != null) out.push(`  correlation ${cal.correlation.toFixed(2)} (0 means the score ranks nothing)`);
+    const ci = (c) => (c ? ` [95% CI ${c[0].toFixed(2)} to ${c[1].toFixed(2)}]` : '');
+    if (cal.correlation != null) out.push(`  correlation ${cal.correlation.toFixed(2)}${ci(cal.ci)}, rank correlation ${cal.rank.toFixed(2)}${ci(cal.rankCi)}, n=${cal.n} (0 means the score ranks nothing)`);
+    // A pile of zeros is usually a hard gate (blocked, flagged), not the score's own judgement, and it can
+    // manufacture a ranking by itself. Our own data: 262 of 267 zeros were risk=high, rank 0.41 overall, 0.05 without them
+    const zeros = done.filter((r) => r.score === 0).length;
+    if (zeros > 0.1 * cal.n) {
+      const nz = scoreCalibration(done.filter((r) => r.score > 0));
+      if (nz.rank != null) out.push(`  ${zeros} signals sit at exactly 0, which usually means a hard gate rather than the score's own judgement. Without them: rank correlation ${nz.rank.toFixed(2)}${ci(nz.rankCi)}, n=${nz.n}`);
+    }
     out.push('');
   }
 
