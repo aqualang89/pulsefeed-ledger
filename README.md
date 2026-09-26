@@ -6,7 +6,9 @@ Everything here was tested on a live bot, not a backtest. PulseFeed has been pos
 
 The ledger also caught its own author, twice, while this repo was being built. That is in [Corrections](#corrections), near the top, where it belongs.
 
-Demo video (46s, first version, see Corrections): https://x.com/aqualanga/status/2102688996979560850
+Demo video (36s): https://x.com/aqualanga/status/2103810041639850437
+
+The first demo, whose claims are corrected below: https://x.com/aqualanga/status/2102688996979560850
 
 ## Try it in one minute, no key
 
